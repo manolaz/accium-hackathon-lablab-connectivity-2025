@@ -1,27 +1,28 @@
 import streamlit as st
-from openai import OpenAI
+from google.generativeai import generativeai
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
 import folium
+from geopy.geocoders import Nominatim
 
 # Show title and description.
 st.title("🌐 Amalgam Connect: Bridging the Digital Divide")
 st.write(
     "Amalgam Connect is at the forefront of revolutionizing network infrastructure planning and deployment. "
     "Our AI-driven platform optimizes connectivity for underserved regions, focusing on schools, healthcare facilities, and government institutions. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
+    "To use this app, you need to provide a Google Generative AI Gemini SDK API key, which you can get from the Google Cloud Console. "
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
+# Ask user for their Google Generative AI Gemini SDK API key via `st.text_input`.
 # Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
 # via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
+google_api_key = st.text_input("Google Generative AI Gemini SDK API Key", type="password")
+if not google_api_key:
+    st.info("Please add your Google Generative AI Gemini SDK API key to continue.", icon="🗝️")
 else:
 
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+    # Create a Google Generative AI Gemini SDK client.
+    client = generativeai.Client(api_key=google_api_key)
 
     # Let the user upload a file via `st.file_uploader`.
     uploaded_file = st.file_uploader(
@@ -46,15 +47,14 @@ else:
             }
         ]
 
-        # Generate an answer using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        # Generate an answer using the Google Generative AI Gemini SDK.
+        response = client.generate_text(
+            model="gemini-2.0-flask",
             messages=messages,
-            stream=True,
         )
 
-        # Stream the response to the app using `st.write_stream`.
-        st.write_stream(stream)
+        # Display the response in the app.
+        st.write(response['choices'][0]['message']['content'])
 
 # Geospatial analysis section
 st.header("Intelligent Mapping")
@@ -82,6 +82,19 @@ for idx, row in gdf.iterrows():
 
 # Display the map
 st._arrow_folium(m, width=700, height=500)
+
+# Get user geo-location
+st.header("User Geo-Location")
+st.write("Get your current geo-location and view it on the map.")
+
+geolocator = Nominatim(user_agent="geoapiExercises")
+location = geolocator.geocode("Your address here")
+
+if location:
+    st.write(f"Latitude: {location.latitude}, Longitude: {location.longitude}")
+    folium.Marker([location.latitude, location.longitude], popup="Your Location").add_to(m)
+else:
+    st.write("Location not found")
 
 # Collaborative planning and infrastructure design section
 st.header("Collaborative Planning and Infrastructure Design")
