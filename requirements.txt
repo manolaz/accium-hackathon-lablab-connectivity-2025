@@ -1,2 +1,5 @@
 streamlit
 openai
+geopandas
+shapely
+folium
