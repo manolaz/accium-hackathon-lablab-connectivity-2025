@@ -1,10 +1,14 @@
 import streamlit as st
 from openai import OpenAI
+import geopandas as gpd
+from shapely.geometry import Point, Polygon
+import folium
 
 # Show title and description.
-st.title("📄 Document question answering")
+st.title("🌐 Amalgam Connect: Bridging the Digital Divide")
 st.write(
-    "Upload a document below and ask a question about it – GPT will answer! "
+    "Amalgam Connect is at the forefront of revolutionizing network infrastructure planning and deployment. "
+    "Our AI-driven platform optimizes connectivity for underserved regions, focusing on schools, healthcare facilities, and government institutions. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
 )
 
@@ -51,3 +55,36 @@ else:
 
         # Stream the response to the app using `st.write_stream`.
         st.write_stream(stream)
+
+# Geospatial analysis section
+st.header("Intelligent Mapping")
+st.write("Utilize advanced geospatial analysis to identify optimal network deployment areas with precision.")
+
+# Example geospatial analysis using geopandas and shapely
+data = {
+    'Name': ['School A', 'School B', 'Hospital A', 'Gov Office'],
+    'Latitude': [34.0522, 36.1699, 34.0522, 36.1699],
+    'Longitude': [-118.2437, -115.1398, -118.2437, -115.1398]
+}
+gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data['Longitude'], data['Latitude']))
+
+# Display the geospatial data
+st.write(gdf)
+
+# Mapping section
+st.header("Mapping")
+st.write("Leverage OpenStreetMap data for accurate and up-to-date mapping information in your network planning.")
+
+# Example mapping using folium
+m = folium.Map(location=[35.0, -117.0], zoom_start=6)
+for idx, row in gdf.iterrows():
+    folium.Marker([row['Latitude'], row['Longitude']], popup=row['Name']).add_to(m)
+
+# Display the map
+st._arrow_folium(m, width=700, height=500)
+
+# Collaborative planning and infrastructure design section
+st.header("Collaborative Planning and Infrastructure Design")
+st.write("Foster partnerships between telecom providers, government agencies, and local institutions for seamless integration.")
+st.write("Design cost-effective and sustainable network solutions tailored to each region's unique needs.")
+st.write("Contribute to worldwide efforts in bridging the digital divide and promoting equal access to information.")
